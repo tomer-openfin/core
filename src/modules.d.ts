@@ -55,6 +55,7 @@ declare module 'electron' {
         isDestroyed(): boolean;
         on(event: string, callback: (...args: any[]) => any): void;
         sendbyname(classname: string, windowname: string, message: string, maskPayload?: boolean): boolean;
+        sendbyid(id: number, message: string, maskPayload?: boolean): boolean;
         setmessagetimeout(timeout: number): void;
     }
 
@@ -116,6 +117,7 @@ declare module 'electron' {
         minimize(): void;
         on(eventName: string, listener: (a: any, wnd: any, msg: any) => any): any;
         once(eventName: string, listener: (a: any, wnd: any, msg: any) => any): any;
+        removeAllListeners(eventName?: string): any;
         removeListener(eventName: string, listener: (a: any, wnd: any, msg: any) => any): any;
         restore(): void;
         sendMessageToWindowByHwnd(hWnd: string, timeout: number, data: string): any;
@@ -142,6 +144,8 @@ declare module 'electron' {
             'visibility-changed': (() => void)[];
         };
     }
+
+    export class ExternalWindow extends BrowserWindow { }
 
     export class webContents {
         hasFrame: (frameName: string) => boolean;
@@ -201,7 +205,7 @@ declare module 'electron' {
         export function readText(type?: string): string;
     }
 
-    export class winEventHookEmitter extends EventEmitter {
-        constructor(opts: { pid?: number });
+    export class WinEventHookEmitter extends EventEmitter {
+        constructor(opts?: { pid?: number });
     }
 }
