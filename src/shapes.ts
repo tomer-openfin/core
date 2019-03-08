@@ -438,11 +438,12 @@ interface BrowserWindowMock extends BrowserWindowElectron {
 }
 
 export interface ExternalWindow extends BrowserWindowElectron {
-    _window?: {};
     _options: {};
+    _window?: {};
     app_uuid?: string;
     browserWindow: BrowserWindowMock;
     groupUuid?: string;
+    isExternalWindow: boolean;
     isProxy?: boolean;
     name: string;
     uuid: string;
@@ -464,4 +465,12 @@ export interface RawNativeWindowInfo {
 export interface NativeWindowInfo extends RawNativeWindowInfo {
     name: string;
     uuid: string;
+}
+
+export type GroupWindow = (ExternalWindow | OpenFinWindow) & {
+    isExternalWindow?: boolean;
+};
+
+export interface GroupWindowIdentity extends Identity {
+    isExternalWindow?: boolean;
 }
