@@ -109,6 +109,9 @@ let browserWindowEventMap = {
     'minimize': {
         topic: 'minimized'
     },
+    'unresponsive': {
+        topic: 'not-responding'
+    },
     'restore': {
         topic: 'restored'
     },
@@ -132,7 +135,19 @@ let webContentsEventMap = {
     'did-fail-load': {
         topic: 'resource-load-failed',
         decorator: loadFailedDecorator
-    }
+    },
+    'certificate-error': {
+        topic: 'resource-certificate-error'
+    },
+    'plugin-crashed': {
+        topic: 'resource-plugin-crashed'
+    },
+    'crashed': {
+        topic: 'resource-crashed'
+    },
+    'unresponsive': {
+        topic: 'resource-unresponsive'
+    },
 };
 
 function genWindowKey(identity) {
