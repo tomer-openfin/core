@@ -15,6 +15,7 @@ let nativeImage = electron.nativeImage;
 let _ = require('underscore');
 const crypto = require('crypto');
 import * as Rx from 'rxjs';
+import userOptions from '../../../js-adapter/src/api/window/userOptions';
 
 // local modules
 let animations = require('../animations.js');
@@ -1296,7 +1297,12 @@ Window.getOptions = function(identity) {
     // In the case that the identity passed does not exist, or is not a window,
     // return the entity info object. The fail case is used for frame identity on spin up.
     try {
-        return getElectronBrowserWindow(identity, 'get options for')._options;
+        const allOptions = getElectronBrowserWindow(identity, 'get options for')._options;
+        const res = {};
+        allOptions.keys().forEach(key => {
+            if(userOptions.includes(key)) res[key] = clone(allOptions[key]);
+        });
+        return res;
     } catch (e) {
         return System.getEntityInfo(identity);
     }
@@ -1681,7 +1687,6 @@ Window.updateOptions = function(identity, updateObj) {
     let { uuid, name } = identity;
     let diff = {},
         invalidOptions = [];
-    let clone = obj => typeof obj === 'undefined' ? obj : JSON.parse(JSON.stringify(obj)); // this works here, but has limitations; reuse with caution.
 
     try {
         for (var opt in updateObj) {
@@ -2405,5 +2410,10 @@ function boundsVisible(bounds, monitorInfo) {
     }
     return visible;
 }
+
+// this works here, but has limitations; reuse with caution.
+function clone(obj) {
+    typeof obj === 'undefined' ? obj : JSON.parse(JSON.stringify(obj));
+} 
 
 module.exports.Window = Window;
