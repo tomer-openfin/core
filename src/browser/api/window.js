@@ -1299,8 +1299,10 @@ Window.getOptions = function(identity) {
     try {
         const allOptions = getElectronBrowserWindow(identity, 'get options for')._options;
         const res = {};
-        allOptions.keys().forEach(key => {
-            if(userOptions.includes(key)) res[key] = clone(allOptions[key]);
+        Object.keys(allOptions).forEach(key => {
+            if (userOptions.includes(key)) {
+                res[key] = clone(allOptions[key]);
+            }
         });
         return res;
     } catch (e) {
@@ -2413,7 +2415,7 @@ function boundsVisible(bounds, monitorInfo) {
 
 // this works here, but has limitations; reuse with caution.
 function clone(obj) {
-    typeof obj === 'undefined' ? obj : JSON.parse(JSON.stringify(obj));
-} 
+    return typeof obj === 'undefined' ? obj : JSON.parse(JSON.stringify(obj));
+}
 
 module.exports.Window = Window;
