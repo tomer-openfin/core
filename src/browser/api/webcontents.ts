@@ -29,12 +29,18 @@ export function navigate (webContents: Electron.WebContents, url: string) {
 }
 
 export async function navigateBack (webContents: Electron.WebContents) {
+    if (!webContents.canGoBack()) {
+        return Promise.reject(new Error('Cannot go back.'));
+    }
     const navigationEnd = createNavigationEndPromise(webContents);
     webContents.goBack();
     return navigationEnd;
 }
 
 export async function navigateForward (webContents: Electron.WebContents) {
+    if (!webContents.canGoForward()) {
+        return Promise.reject(new Error('Cannot go forward.'));
+    }
     const navigationEnd = createNavigationEndPromise(webContents);
     webContents.goForward();
     return navigationEnd;
@@ -63,11 +69,14 @@ export function stopNavigation(webContents: Electron.WebContents) {
 
 function createNavigationEndPromise(webContents: Electron.WebContents): Promise<void> {
     return new Promise((resolve, reject) => {
+        const TIME_UNTIL_TIMEOUT_IN_MS = 3000;
         const chromeErrCodesLink = 'https://cs.chromium.org/chromium/src/net/base/net_error_list.h';
+        let timeout: number;
         const removeEventListeners = () => {
             // tslint:disable: no-use-before-declare
             webContents.removeListener('did-finish-load', didSucceed);
             webContents.removeListener('did-fail-load', didFail);
+            clearTimeout(timeout);
             // tslint:enable: no-use-before-declare
 
         };
@@ -81,7 +90,13 @@ function createNavigationEndPromise(webContents: Electron.WebContents): Promise<
             removeEventListeners();
             resolve();
         };
+        const didTimeout = () => {
+            removeEventListeners();
+            const error = new Error('error: navigation timeout.');
+            reject(error);
+        };
         webContents.once('did-fail-load', didFail);
         webContents.once('did-finish-load', didSucceed);
+        timeout = <any> setTimeout(didTimeout, TIME_UNTIL_TIMEOUT_IN_MS);
     });
 }
