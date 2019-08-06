@@ -33,6 +33,12 @@ async function getInfo(identity: Identity, message: APIMessage) {
     const view = getBrowserViewByIdentity({ uuid, name });
     return browser_view.getInfo(view);
 }
+async function destroy(identity: Identity, message: APIMessage) {
+    const { payload } = message;
+    const { uuid, name } = payload;
+    const view = getBrowserViewByIdentity({ uuid, name });
+    return browser_view.destroy(view);
+}
 async function show(identity: Identity, message: APIMessage) {
     const { payload } = message;
     const { uuid, name } = payload;
@@ -52,7 +58,8 @@ export const browserViewActionMap: ActionSpecMap = {
     'set-browser-view-bounds': setBounds,
     'get-browser-view-info': getInfo,
     'hide-browser-view': hide,
-    'show-browser-view': show
+    'show-browser-view': show,
+    'destroy-browser-view': destroy
 };
 
 export function init() {

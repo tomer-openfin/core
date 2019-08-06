@@ -80,7 +80,7 @@ export async function attach(ofView: OfView, toIdentity: Identity) {
         updateViewTarget(ofView, toIdentity);
     }
 }
-function destroy (ofView: OfView) {
+export function destroy (ofView: OfView) {
    removeBrowserView(ofView);
    ofView.view.destroy();
 }
