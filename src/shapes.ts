@@ -15,6 +15,7 @@ export interface Identity {
     name?: string;
     runtimeUuid?: string;
     entityType?: EntityType;
+    parentFrame?: string;
 }
 
 export interface ProviderIdentity extends Identity {
@@ -28,7 +29,12 @@ export interface ResourceFetchIdentity extends Identity {
     resourceFetch?: boolean;
 }
 
-export type EntityType = 'window' | 'iframe' | 'external connection' | 'unknown';
+export enum EntityType {
+   WINDOW = 'window',
+   IFRAME = 'iframe',
+   EXTERNAL = 'external connection',
+   UNKNOWN = 'unknown'
+}
 export type AuthCallback = (username: string, password: string) => void;
 export type Listener = (...args: any[]) => void;
 
@@ -108,13 +114,11 @@ export interface WebOptions {
 }
 export interface OpenFinWindow extends InjectableContext {
     isIframe?: boolean;
-    parentFrameId?: number;
     _options: WindowOptions;
     _window: BrowserWindow;
     app_uuid: string;
     browserWindow: BrowserWindow;
     children: OpenFinWindow[];
-    frames: Map<string, ChildFrameInfo>;
     forceClose: boolean;
     groupUuid: string|null;
     hideReason: string;
