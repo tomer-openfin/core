@@ -1,5 +1,15 @@
+import GoldenLayout from './openfin-layout.d';
+import Fin from '../../../js-adapter/src/api/fin';
+import { Identity } from '../../../src/shapes';
+import { BrowserView } from '../../../js-adapter/src/api/browserview/browserview';
+
+declare var fin: Fin;
+
 class Layout {
-    constructor(config, container) {
+    layout: GoldenLayout;
+    isDragging: boolean;
+
+    constructor(config: GoldenLayout.Config, container: HTMLElement) {
 
         this.layout = new GoldenLayout(config, container);
         this.isDragging = false;
@@ -15,7 +25,7 @@ class Layout {
     async init() {
         //Restore the layout.
         // await this.restore();
-        this.layout.registerComponent( 'browserView', function( container, componentState ){
+        this.layout.registerComponent( 'browserView', function( container: HTMLElement, componentState: any ){
             return { componentState, container };
         });
         this.setupListeners();
@@ -38,10 +48,10 @@ class Layout {
         this.layout.on('initialised', this.initializeViews.bind(this));
     }
 
-    onTabCreated(tab) {
+    onTabCreated(tab: GoldenLayout.Tab) {
         this.isDragging = false;
         const dragListener = tab._dragListener;
-        const identity = tab.contentItem.config.componentState.identity;
+        const identity = (<GoldenLayout.ComponentConfig> tab.contentItem.config).componentState.identity;
         
         // this.injectPopoutButton(tab);
         dragListener.on('drag', this.onTabDrag.bind(this, tab._dragListener, identity));
@@ -64,7 +74,7 @@ class Layout {
     //     tab.element[0].insertBefore(wrapper, closeButton);
     // }
 
-    onItemDestroyed(e) {
+    onItemDestroyed(e: GoldenLayout.ComponentConfig) {
         //Need to wait a bit for the view to move (on a drag and drop)
         setTimeout(() => {
             if(e.componentName === 'browserView') {
@@ -77,16 +87,16 @@ class Layout {
         }, 100);
     }
 
-    onTabDrag(dragListener, tabIdentity) {
+    onTabDrag(dragListener: GoldenLayout.EventEmitter, tabIdentity: Identity) {
         if(!this.isDragging) {
             this.isDragging = true;
 
-            const allViews = this.layout.root.getComponentsByName('browserView').map(item => item.container.getState().identity);
+            const allViews = this.layout.root.getComponentsByName('browserView').map((item: GoldenLayout.ContentItem) => item.container.getState().identity);
             allViews.push(tabIdentity); // we have to add currently dragged tab manualy since it's not in the DOM atm
-            allViews.forEach(view => fin.BrowserView.wrapSync(view).hide());
-            const onDragEnd = (e) => {
+            allViews.forEach((view: Identity) => fin.BrowserView.wrapSync(view).hide());
+            const onDragEnd = () => {
                 this.isDragging = false;
-                allViews.forEach(view => fin.BrowserView.wrapSync(view).show());
+                allViews.forEach((view: Identity) => fin.BrowserView.wrapSync(view).show());
                 dragListener.off('dragStop', onDragEnd);
                 this.updateViewTitles();
             }
@@ -150,7 +160,7 @@ class Layout {
 
     attachViews() {
         const browserViews = this.layout.root.getComponentsByName('browserView');
-        browserViews.forEach(bv => {
+        browserViews.forEach((bv: GoldenLayout.ComponentConfig) => {
             const rView = new ResizableView(bv.componentState);
             rView.renderIntoComponent(bv);
         });
@@ -169,8 +179,8 @@ class Layout {
 
     async updateViewTitles() {
         const allViewWrappers = this.layout.root.getComponentsByName('browserView');
-        const allViewIdentities = allViewWrappers.map(item => item.container.getState().identity);
-        const allViews = allViewIdentities.map(fin.BrowserView.wrapSync.bind(fin));
+        const allViewIdentities = allViewWrappers.map((item: GoldenLayout.ContentItem) => item.container.getState().identity);
+        const allViews: BrowserView[] = allViewIdentities.map(fin.BrowserView.wrapSync.bind(fin));
         allViews.forEach(async view => {
             let {title} = await view.getInfo();
             const [item] = this.findViewWrapper(view.identity)
@@ -193,9 +203,9 @@ class Layout {
     //     }
     // }
 
-    findViewWrapper ({name, uuid}) {
+    findViewWrapper ({name, uuid}: Identity) {
         return this.layout.root.getComponentsByName('browserView')
-            .filter( wrapper =>
+            .filter( (wrapper: GoldenLayout.ComponentConfig) =>
                      wrapper.componentState.identity.name === name &&
                      wrapper.componentState.identity.uuid === uuid
                    );
